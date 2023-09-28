@@ -1,10 +1,12 @@
+use std::{env, error::Error, fs::{File, create_dir_all}, io::{copy, BufWriter, Cursor}, time::Instant};
 use reqwest::Client;
-use std::error::Error;
-use std::fs::{File, create_dir_all};
-use std::io::{Cursor, BufWriter, copy};
-use std::time::Instant;
 
-pub async fn download_clip(url: &str, clip_id: &str) -> Result<(), Box<dyn Error>> {
+// Chatgpted :money_mouth:
+fn create_link(text: &str, path: &str) -> String {
+    format!("\x1B]8;;file://{path}\x07{text}\x1B]8;;\x07", text = text, path = path)
+}
+
+pub async fn download(url: &str, clip_id: &str, dir: &str) -> Result<(), Box<dyn Error>> {
     let client = Client::new();
     let response = client.get(url).send().await?;
     
@@ -13,14 +15,15 @@ pub async fn download_clip(url: &str, clip_id: &str) -> Result<(), Box<dyn Error
         return Ok(());
     }
 
-    create_dir_all("twitch-clips")?;
+    create_dir_all(dir)?;
 
-    let dest = File::create(format!("twitch-clips/{}.mp4", clip_id))?;
+    let dest = File::create(format!("{}/{}.mp4", dir, clip_id))?;
     let stream = response.bytes().await?.into_iter().collect::<Vec<_>>();
     let start = Instant::now();
     copy(&mut Cursor::new(stream), &mut BufWriter::new(dest))?;
+
     let duration = start.elapsed();
-    println!("Downloaded in {:?}", duration);
+    println!("Downloaded in {:?}\nSaved to {}", duration, create_link(dir, env::current_dir()?.join(dir).to_str().unwrap()));
 
     Ok(())
 }

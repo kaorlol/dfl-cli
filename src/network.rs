@@ -1,11 +1,9 @@
-use reqwest::header::{HeaderMap, HeaderValue};
-use reqwest::Client;
+use std::{error::Error, time::Instant};
+use reqwest::{Client, header::{HeaderMap, HeaderValue}};
 use serde_json::Value;
 use urlencoding::encode;
-use std::error::Error;
-use std::time::Instant;
 
-pub async fn fetch_clip_info(clip_id: &str) -> Result<Value, Box<dyn Error>> {
+pub async fn fetch_clip_url(clip_id: &str) -> Result<Value, Box<dyn Error>> {
     let mut headers = HeaderMap::new();
     headers.insert("Client-ID", HeaderValue::from_static("kimne78kx3ncx6brgo4mv6wki5h1ko"));
 
@@ -42,3 +40,7 @@ pub async fn fetch_clip_info(clip_id: &str) -> Result<Value, Box<dyn Error>> {
 
     Ok(download_url.into())
 }
+
+// pub async fn fetch_video_url(video_id: &str) -> Result<Value, Box<dyn Error>> {
+
+// }
