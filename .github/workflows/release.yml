@@ -1,0 +1,45 @@
+name: Rust Release
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+            - name: Set up Rust
+              uses: actions-rs/toolchain@v1
+              with:
+                toolchain: stable
+                override: true
+            - name: Build and Test
+              run: |
+                cargo build --release
+                cargo test
+            - name: Create Release
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                with:
+                tag_name: ${{ github.ref }}
+                release_name: Release ${{ github.ref }}
+                body: |
+                    Changes in this Release:
+                    - Added feature X
+                    - Fixed bug Y
+                draft: false
+                prerelease: false
+            - name: Upload Release Asset
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ./target/release/my_rust_app
+                asset_name: my_rust_app-${{ github.ref }}.tar.gz
+                asset_content_type: application/gzip
