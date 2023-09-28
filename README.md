@@ -8,7 +8,7 @@
 
 ### How to use it
 
-Download the [release](https://github.com/Uvxtq/download-from-link/releases/latest) and preferably create a new folder and put the exe in there. Open a terminal and run: ```download-from-link.exe <link you want to download>``` (Make sure you are cd'ed into the directory with the exe!)
+Download **download-from-link.exe** from the [latest release](https://github.com/Uvxtq/download-from-link/releases/latest) and preferably create a new folder and put the exe in there. Open a terminal and run: ```download-from-link.exe <link you want to download>``` (Make sure you are cd'ed into the directory with the exe!)
 
 ## Supported
 
