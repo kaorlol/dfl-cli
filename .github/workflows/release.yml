@@ -25,9 +25,9 @@ jobs:
               uses: actions/create-release@v1
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                with:
-                tag_name: ${{ github.ref }}
-                release_name: Release ${{ github.ref }}
+              with:
+                tag_name: v1.0.0
+                release_name: Release v1.0.0
                 body: |
                     Changes in this Release:
                     - Added feature X
@@ -38,8 +38,8 @@ jobs:
               uses: actions/upload-release-asset@v1
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                with:
+              with:
                 upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: ./target/release/my_rust_app
-                asset_name: my_rust_app-${{ github.ref }}.tar.gz
+                asset_path: ./target/release/download-from-link
+                asset_name: download-from-link-v1.0.0.tar.gz
                 asset_content_type: application/gzip
