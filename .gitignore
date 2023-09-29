@@ -7,4 +7,6 @@
 /target/release/examples/
 /target/release/incremental/
 /target/release/.cargo-lock
+/target/release/download_from_link.pdb
+/target/release/download_from_link.d
 /twitch-clips
