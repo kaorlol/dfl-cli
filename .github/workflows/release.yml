@@ -28,10 +28,6 @@ jobs:
               with:
                 tag_name: v1.0.0
                 release_name: Release v1.0.0
-                body: |
-                    Changes in this Release:
-                    - Added feature X
-                    - Fixed bug Y
                 draft: false
                 prerelease: false
             - name: Upload Release Asset
