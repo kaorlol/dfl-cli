@@ -1,41 +1,47 @@
 name: Rust Release
 
 on:
-    push:
-        branches:
-            - master
+  push:
+    branches:
+      - master
 
 jobs:
-    build:
-        runs-on: windows-latest
+  build:
+    runs-on: windows-latest
 
-        steps:
-            - uses: actions/checkout@v2
-            - name: Set up Rust
-              uses: actions-rs/toolchain@v1
-              with:
-                toolchain: stable
-                override: true
-            - name: Build and Test
-              run: |
-                cargo build --release
-                cargo test
-            - name: Create Release
-              id: create_release
-              uses: actions/create-release@v1
-              env:
-                GITHUB_TOKEN: ${{ secrets.TOKEN }}
-              with:
-                tag_name: Release
-                release_name: Release
-                draft: false
-                prerelease: false
-            - name: Upload Release Asset
-              uses: actions/upload-release-asset@v1
-              env:
-                GITHUB_TOKEN: ${{ secrets.TOKEN }}
-              with:
-                upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: ./target/release/download-from-link
-                asset_name: download-from-link.exe
-                asset_content_type: application/octet-stream
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - name: Build and Test
+        run: |
+          cargo build --release
+          cargo test
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          DATE_TIME: ${{ steps.set_date_time.outputs.date_time }}
+          RANDOM_STRING: ${{ steps.set_random_string.outputs.random_string }}
+        with:
+          tag_name: Release
+          release_name: Release
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/release/download-from-link
+          asset_name: download-from-link.exe
+          asset_content_type: application/octet-stream
+      - id: set_date_time
+        run: echo "::set-output name=date_time::$(date +%Y-%m-%d-%H-%M-%S)"
+      - id: set_random_string
+        run: echo "::set-output name=random_string::$(openssl rand -hex 4)"
