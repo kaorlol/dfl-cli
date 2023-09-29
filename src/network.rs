@@ -1,7 +1,40 @@
 use std::{error::Error, time::Instant};
+use regex::Regex;
 use reqwest::{Client, header::{HeaderMap, HeaderValue}};
 use serde_json::Value;
 use urlencoding::encode;
+
+fn get_type(url: &str) -> (bool, &str) {
+    let regex_patterns = [
+        (r"https://clips.twitch.tv/[A-Za-z0-9]+(-[A-Za-z0-9]+)*", "clip"),
+        (r"https://www.twitch.tv/videos/[0-9]+", "video"),
+    ];
+
+    for (pattern, r#type) in regex_patterns.iter() {
+        let regex = Regex::new(pattern).unwrap();
+        if regex.is_match(url) {
+            return (true, r#type);
+        }
+    }
+
+    (false, "invalid")
+}
+
+
+pub async fn check_url(url: &str) -> Result<Value, Box<dyn Error>> {
+    let (is_valid, url_type) = get_type(url);
+    if !is_valid {
+        return Err("Invalid url".into());
+    }
+
+    let client = Client::new();
+    let res = client.get(url).send().await?;
+    if !res.status().is_redirection() {
+        return Err("Invalid url".into());
+    }
+
+    Ok(url_type.into())
+}
 
 pub async fn fetch_clip_url(clip_id: &str) -> Result<Value, Box<dyn Error>> {
     let mut headers = HeaderMap::new();
