@@ -24,13 +24,7 @@ fn get_type(url: &str) -> (bool, &str) {
 pub async fn check_url(url: &str) -> Result<Value, Box<dyn Error>> {
     let (is_valid, url_type) = get_type(url);
     if !is_valid {
-        return Err("Invalid url".into());
-    }
-
-    let client = Client::new();
-    let res = client.get(url).send().await?;
-    if !res.status().is_redirection() {
-        return Err("Invalid url".into());
+        return Err("Url does not match regex pattern".into());
     }
 
     Ok(url_type.into())
@@ -54,13 +48,16 @@ pub async fn fetch_clip_url(clip_id: &str) -> Result<Value, Box<dyn Error>> {
         .await?;
     
     if !res.status().is_success() {
-        println!("Error: {}", res.status());
-        return Ok("Unable to fetch clip info".into());
+        return Err("Unsuccessful response (GQL API)".into());
     }
     
     let body = res.text().await?;
     let json_response: Value = serde_json::from_str(&body)?;
     let clip_data = &json_response[0]["data"]["clip"];
+    if clip_data.is_null() {
+        return Err("Clip not found".into());
+    }
+
     let download_url = format!(
         "{}?sig={}&token={}",
         clip_data["videoQualities"][0]["sourceURL"].as_str().unwrap(),
