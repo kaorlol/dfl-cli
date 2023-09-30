@@ -17,9 +17,8 @@ fn get_type(url: &str) -> (bool, &str) {
         }
     }
 
-    (false, "invalid")
+    return (false, "invalid");
 }
-
 
 pub async fn check_url(url: &str) -> Result<Value, Box<dyn Error>> {
     let (is_valid, url_type) = get_type(url);
@@ -70,7 +69,3 @@ pub async fn fetch_clip_url(clip_id: &str) -> Result<Value, Box<dyn Error>> {
 
     Ok(download_url.into())
 }
-
-// pub async fn fetch_video_url(video_id: &str) -> Result<Value, Box<dyn Error>> {
-
-// }

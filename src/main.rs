@@ -1,13 +1,13 @@
-use std::env;
+use std::{env, error::Error};
 
 mod network;
 mod download;
 
 use network::{fetch_clip_url, check_url};
-use download::download;
+use download::download_clip;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
         println!("Usage: {} <url>", args[0]);
@@ -16,17 +16,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let url = &args[1];
     let url_type = check_url(url).await?;
+    let id = url.split('/').last().unwrap();
 
     if url_type == "clip" {
-        let clip_id = url.split('/').last().unwrap();
-        println!("Downloading clip {}", clip_id);
+        println!("Downloading clip {}", id);
 
-        let clip_url = fetch_clip_url(clip_id).await.and_then(|v| {
+        let clip_url = fetch_clip_url(id).await.and_then(|v| {
             Ok(v.as_str().unwrap().to_string())
         })?;
     
-        download(&clip_url, clip_id, "twitch-clips").await?;
+        download_clip(&clip_url, id).await?;
     }
+
+    // if url_type == "video" {
+    //     let (video_parts, title) = fetch_video_parts(id).await?;
+
+    //     println!("Downloading {}", title);
+
+    //     download_video(video_parts, title).await?;
+    // }
 
     Ok(())
 }
