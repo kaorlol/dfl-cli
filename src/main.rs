@@ -1,10 +1,11 @@
 use std::{env, error::Error};
+use colored::*;
 
 mod network;
 mod download;
 
-use network::{fetch_clip_url, check_url};
-use download::download_clip;
+use network::{fetch, check_url};
+use download::{download, setup_files};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -18,23 +19,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let url_type = check_url(url).await?;
     let id = url.split('/').last().unwrap();
 
-    if url_type == "clip" {
-        println!("Downloading clip {}", id);
+    setup_files().await?;
 
-        let clip_url = fetch_clip_url(id).await.and_then(|v| {
-            Ok(v.as_str().unwrap().to_string())
-        })?;
-    
-        download_clip(&clip_url, id).await?;
-    }
+    println!("{} {}", "Fetching:".blue(), url);
 
-    // if url_type == "video" {
-    //     let (video_parts, title) = fetch_video_parts(id).await?;
-
-    //     println!("Downloading {}", title);
-
-    //     download_video(video_parts, title).await?;
-    // }
+    let (url, title) = fetch(&url_type, id).await?;
+    download(&url_type, &url, &title).await?;
 
     Ok(())
 }
