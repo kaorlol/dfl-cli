@@ -14,11 +14,10 @@ Also, make sure you have rust downloaded, you can download it from [rust-lang](h
 
 ## Supported
 
-Twitch: Clips.
+Twitch: Clips and VODs.
 
 ## Soon To Be Added
 
-Twitch: VODs.
 Youtube: shorts, videos.
 
 Also will be adding a mp3 arg to the downloader to download the mp3 instead.
