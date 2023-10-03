@@ -10,3 +10,5 @@
 /target/release/dfl_cli.pdb
 /target/release/dfl-cli.d
 /twitch
+/compress.bat
+/dfl-cli.zip
