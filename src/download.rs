@@ -26,8 +26,9 @@ pub async fn download(type_: &str, url: &str, title: &str) -> Result<(), Box<dyn
 
     let title = remove_not_characters(title);
     let output = format!("twitch\\{}s\\{}.mp4", type_, title);
+    File::create(&output)?; // Create file to prevent ffmpeg from erroring
+
     let start = Instant::now();
-    File::create(&output)?; // Create file to prevent ffmpeg from crashing
     Command::new("./ffmpeg")
         .args(&["-i", url, "-codec", "copy", &output])
         .output()?;
