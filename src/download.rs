@@ -1,5 +1,5 @@
 // use std::{env, error::Error, fs::{File, create_dir_all}, time::Instant, process::Command, io::Write};
-use std::{env, error::Error, fs::create_dir_all, time::Instant, process::Command};
+use std::{env, error::Error, fs::{File, create_dir_all}, time::Instant, process::Command};
 use colored::*;
 
 // extern crate ffmpeg_next as ffmpeg;
@@ -27,6 +27,7 @@ pub async fn download(type_: &str, url: &str, title: &str) -> Result<(), Box<dyn
     let title = remove_not_characters(title);
     let output = format!("twitch\\{}s\\{}.mp4", type_, title);
     let start = Instant::now();
+    File::create(&output)?; // Create file to prevent ffmpeg from crashing
     Command::new("./ffmpeg")
         .args(&["-i", url, "-codec", "copy", &output])
         .output()?;
