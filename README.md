@@ -8,7 +8,7 @@
 
 ### How to use it
 
-Download **dfl-cli.exe** from the [latest release](https://github.com/Uvxtq/dfl-cli/releases/latest) and preferably create a new folder and put the exe in there. Open a terminal and run: ```dfl-cli.exe <link you want to download>``` (Make sure you are cd'ed into the directory with the exe!)
+Download **dfl-cli.zip** from the [latest release](https://github.com/Uvxtq/dfl-cli/releases/latest) and extract the zip folder. Open a terminal and run: ```dfl-cli.exe <link you want to download>``` (Make sure you are cd'ed into the directory with the exe!)
 
 ## Supported
 
