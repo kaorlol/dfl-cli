@@ -10,8 +10,6 @@
 
 Download **dfl-cli.exe** from the [latest release](https://github.com/Uvxtq/dfl-cli/releases/latest) and preferably create a new folder and put the exe in there. Open a terminal and run: ```dfl-cli.exe <link you want to download>``` (Make sure you are cd'ed into the directory with the exe!)
 
-Also, make sure you have rust downloaded, you can download it from [rust-lang](https://www.rust-lang.org/tools/install).
-
 ## Supported
 
 Twitch: Clips and VODs.
