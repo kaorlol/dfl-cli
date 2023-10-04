@@ -62,15 +62,14 @@ mod twitch {
     }
 
     async fn get_highest_bandwidth_url(playlist_body: &str) -> Result<String, Box<dyn std::error::Error>> {
-        // Regex pattern
         let re = Regex::new(r"#EXT-X-STREAM-INF:BANDWIDTH=(\d+),.*\n(.*)\n")?;
     
         // Find highest bandwidth URL
-        let mut highest_bandwidth = 0;
         let mut highest_bandwidth_url = String::new();
+        let mut highest_bandwidth = 0;
     
-        for cap in re.captures_iter(&playlist_body) {
-            let bandwidth: i32 = cap[1].parse().unwrap();
+        for cap in re.captures_iter(playlist_body) {
+            let bandwidth: i32 = cap[1].parse()?;
             if bandwidth > highest_bandwidth {
                 highest_bandwidth = bandwidth;
                 highest_bandwidth_url = cap[2].to_string();
@@ -92,7 +91,7 @@ mod twitch {
         // Fetch clip download URL
         let info_query = format!(r#"{{"query":"query{{clip(slug:\"{}\"){{title}}}}","variables":{{}}}}"#, id);
         let info_response_json = send_gql_request(info_query).await?;
-        let title = remove_last_non_char(info_response_json["data"]["clip"]["title"].to_string().replace("\"", "").as_str());
+        let title = remove_last_non_char(&info_response_json["data"]["clip"]["title"].to_string().replace("\"", ""));
         let download_url = format!(
             "{}?sig={}&token={}",
             data["videoQualities"][0]["sourceURL"].as_str().unwrap_or_default(),
@@ -109,7 +108,7 @@ mod twitch {
         // Fetch video info
         let info_query = format!(r#"{{"query":"query{{video(id:\"{}\"){{title}}}}","variables":{{}}}}"#, id);
         let info_response = send_gql_request(info_query).await?;
-        let title = remove_last_non_char(info_response["data"]["clip"]["title"].to_string().replace("\"", "").as_str());
+        let title = remove_last_non_char(&info_response["data"]["video"]["title"].to_string().replace("\"", ""));
 
         // Fetch video playback access token
         let token_query = format!(r#"{{"operationName":"PlaybackAccessToken_Template","query":"query PlaybackAccessToken_Template($vodID: ID!, $playerType: String!) {{  videoPlaybackAccessToken(id: $vodID, params: {{platform: \"web\", playerBackend: \"mediaplayer\", playerType: $playerType}}) @include(if: true) {{    value    signature    __typename  }}}}", "variables":{{"vodID":"{}","playerType":"embed"}}}}"#, id);
