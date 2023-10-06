@@ -1,35 +1,13 @@
-use std::{env, error::Error, fs::create_dir_all, time::Instant, path::Path};
+use std::{env, error::Error, time::Instant, path::Path};
 use colored::*;
-use crate::elapsed::get_elapsed_time;
-
-const DIRECTORIES: [&str; 4] = ["twitch\\clips", "twitch\\videos", "youtube\\videos", "youtube\\shorts"];
-
-pub fn remove_not_characters(text: &str) -> String {
-    return text.chars().filter(|&c| c.is_alphanumeric() || c.is_whitespace()).collect();
-}
-
-pub async fn setup_files() -> Result<(), Box<dyn Error>> {
-    for directory in DIRECTORIES.iter() {
-        create_dir_all(directory)?;
-    }
-
-    Ok(())
-}
+use crate::utils::*;
 
 mod downloader {
-    use std::{error::Error, fs::File, io::prelude::*, path::Path, io::BufWriter};
-    use indicatif::{ProgressBar, ProgressStyle};
-
-    fn create_progress_bar(length: u64) -> ProgressBar {
-        let pb = ProgressBar::new(length);
-        pb.set_style(ProgressStyle::default_bar()
-            .template("[{bar:40.blue}] ETA: {eta}")
-            .expect("Failed to set progress bar style")
-            .progress_chars("=> "));
-        return pb;
-    }
+    use std::{fs::File, io::prelude::*, io::BufWriter};
+    use super::*;
 
     pub mod m3u8 {
+        use indicatif::ProgressBar;
         use url::Url;
         use super::*;
 

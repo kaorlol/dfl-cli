@@ -1,34 +1,6 @@
 use std::{error::Error, time::Instant};
-use regex::Regex;
 use colored::*;
-use crate::elapsed::get_elapsed_time;
-
-fn get_type(url: &str) -> (bool, &str) {
-    let regex_patterns = [
-        (r"https://clips.twitch.tv/[A-Za-z0-9]+(-[A-Za-z0-9]+)*", "twitch-clip"),
-        (r"https://www.twitch.tv/videos/[0-9]+", "twitch-video"),
-        (r"https://www.youtube.com/watch\?v=[A-Za-z0-9_-]+", "youtube-video"),
-        (r"https://www.youtube.com/shorts/[A-Za-z0-9_-]+", "youtube-short")
-    ];
-
-    for (pattern, r#type) in regex_patterns.iter() {
-        let regex = Regex::new(pattern).unwrap();
-        if regex.is_match(url) {
-            return (true, r#type);
-        }
-    }
-
-    return (false, "invalid");
-}
-
-pub async fn check_url(url: &str) -> Result<String, Box<dyn Error>> {
-    let (is_valid, url_type) = get_type(url);
-    if !is_valid {
-        return Err("Url does not match regex pattern".into());
-    }
-
-    Ok(url_type.into())
-}
+use crate::utils::*;
 
 mod twitch {
     use super::Error;

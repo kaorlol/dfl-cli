@@ -1,7 +1,7 @@
-pub mod elapsed;
+pub mod utils;
 pub mod network;
 pub mod downloader;
 
-pub use elapsed::get_elapsed_time;
-pub use network::{fetch, check_url};
-pub use downloader::{download, setup_files};
+pub use utils::*;
+pub use network::fetch;
+pub use downloader::download;

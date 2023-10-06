@@ -2,13 +2,13 @@ use std::{env, error::Error};
 use regex::Regex;
 use colored::*;
 
-mod elapsed;
+mod utils;
 mod network;
 mod downloader;
 
-pub use elapsed::get_elapsed_time;
-use crate::network::{fetch, check_url};
-use crate::downloader::{download, setup_files};
+use crate::utils::*;
+use crate::network::fetch;
+use crate::downloader::download;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
