@@ -13,13 +13,11 @@ Download **dfl-cli.zip** from the [latest release](https://github.com/Uvxtq/dfl-
 ## Supported
 
 Twitch: Clips and VODs.\
-Youtube: Videos.
+Youtube: Videos and shorts.
 
 ## Soon To Be Added
 
-Youtube: shorts.
-
-Also will be adding a mp3 arg to the downloader to download the mp3 instead.
+Add a mp3 arg to the downloader to download the mp3 instead.
 
 ## Contributors
 

@@ -116,6 +116,7 @@ pub async fn download(type_: &str, url: &str, title: &str) -> Result<(), Box<dyn
         "twitch-clip" => downloader::download_mp4(url, Path::new(&output)).await?,
         "twitch-video" => downloader::download_m3u8(url, Path::new(&output)).await?,
         "youtube-video" => downloader::download_mp4(url, Path::new(&output)).await?,
+        "youtube-short" => downloader::download_mp4(url, Path::new(&output)).await?,
         _ => return Err("Invalid type".into())
     }
 

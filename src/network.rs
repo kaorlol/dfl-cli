@@ -10,6 +10,7 @@ fn get_type(url: &str) -> (bool, &str) {
         (r"https://clips.twitch.tv/[A-Za-z0-9]+(-[A-Za-z0-9]+)*", "twitch-clip"),
         (r"https://www.twitch.tv/videos/[0-9]+", "twitch-video"),
         (r"https://www.youtube.com/watch\?v=[A-Za-z0-9_-]+", "youtube-video"),
+        (r"https://www.youtube.com/shorts/[A-Za-z0-9_-]+", "youtube-short")
     ];
 
     // Check if URL matches any regex patterns
@@ -136,6 +137,8 @@ mod twitch {
 pub async fn fetch_video_url(id: &str) -> Result<(String, String), Box<dyn Error>> {
     let client = ClientAsync::default();
     let video = client.video(&id, None).await?;
+
+    println!("{:?}", video);
     let title = video.title;
 
     let mut highest_bitrate = 0;
@@ -148,8 +151,6 @@ pub async fn fetch_video_url(id: &str) -> Result<(String, String), Box<dyn Error
         }
     }
 
-    // println!("{}", video.length);
-
     Ok((url, title))
 }
 
@@ -160,6 +161,7 @@ pub async fn fetch(type_: &str, id: &str) -> Result<(String, String), Box<dyn Er
         "twitch-clip" => twitch::fetch_clip_url(id).await,
         "twitch-video" => twitch::fetch_video_url(id).await,
         "youtube-video" => fetch_video_url(id).await,
+        "youtube-short" => fetch_video_url(id).await,
         _ => Err("Invalid type".into()),
     };
 
