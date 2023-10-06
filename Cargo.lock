@@ -181,7 +181,6 @@ name = "dfl-cli"
 version = "1.2.1"
 dependencies = [
  "colored",
- "hyper",
  "indicatif",
  "invidious",
  "regex",
