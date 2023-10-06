@@ -1,14 +1,5 @@
-/target/debug
-/target/.rustc_info.json
-/target/CACHEDIR.TAG
-/target/release/.fingerprint/
-/target/release/build/
-/target/release/deps/
-/target/release/examples/
-/target/release/incremental/
-/target/release/.cargo-lock
-/target/release/dfl_cli.pdb
-/target/release/dfl-cli.d
+/target
 /twitch
+/youtube
 /compress.bat
 /dfl-cli.zip

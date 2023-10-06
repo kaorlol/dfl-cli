@@ -1,12 +1,16 @@
+// extern crate ytb_downloader;
+
 use std::{env, error::Error};
 use regex::Regex;
 use colored::*;
 
+mod elapsed;
 mod network;
-mod download;
+mod downloader;
 
-use network::{fetch, check_url};
-use download::{download, setup_files};
+pub use elapsed::get_elapsed_time;
+use crate::network::{fetch, check_url};
+use crate::downloader::{download, setup_files};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -31,16 +35,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("{} {}", "Fetching:".blue(), url);
 
-
+    
     let (url, title) = fetch(&url_type, &id).await?;
-
-    if url_type == "youtube-video" {
-        println!("{} {}", "Youtube is not implemented yet".red(), url);
-        return Ok(());
-    }
-
-    let url_type: Vec<&str> = url_type.split('-').collect();
-    download(&url_type[1], &url, &title).await?;
+    download(&url_type, &url, &title).await?;
 
     Ok(())
 }

@@ -1,6 +1,8 @@
 use std::{error::Error, time::Instant};
 use regex::Regex;
 use colored::*;
+use invidious::*;
+use crate::elapsed::get_elapsed_time;
 
 fn get_type(url: &str) -> (bool, &str) {
     // Regex patterns
@@ -131,22 +133,24 @@ mod twitch {
     }
 }
 
-mod youtube {
-    pub async fn fetch_video_url(id: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
-        // Fetch video info
-        let info_url = format!("https://www.youtube.com/get_video_info?video_id={}", id);
-        let client = reqwest::Client::new();
-        let info_response = client.get(&info_url).send().await?;
-        if !info_response.status().is_success() {
-            return Err("Unsuccessful response (Youtube API)".into());
+pub async fn fetch_video_url(id: &str) -> Result<(String, String), Box<dyn Error>> {
+    let client = ClientAsync::default();
+    let video = client.video(&id, None).await?;
+    let title = video.title;
+
+    let mut highest_bitrate = 0;
+    let mut url = String::new();
+    for format in video.adaptive_formats {
+        let bitrate = format.bitrate.parse::<u64>().unwrap();
+        if bitrate > highest_bitrate {
+            highest_bitrate = bitrate;
+            url = format.url;
         }
-
-        // Parse video info
-        let info_body = info_response.text().await?;
-        println!("{}", info_body);
-
-        Ok((String::new(), String::new()))
     }
+
+    // println!("{}", video.length);
+
+    Ok((url, title))
 }
 
 pub async fn fetch(type_: &str, id: &str) -> Result<(String, String), Box<dyn Error>> {
@@ -155,11 +159,11 @@ pub async fn fetch(type_: &str, id: &str) -> Result<(String, String), Box<dyn Er
     let result = match type_ {
         "twitch-clip" => twitch::fetch_clip_url(id).await,
         "twitch-video" => twitch::fetch_video_url(id).await,
-        "youtube-video" => youtube::fetch_video_url(id).await,
+        "youtube-video" => fetch_video_url(id).await,
         _ => Err("Invalid type".into()),
     };
 
-    println!("{} {}ms", "Fetched URL in:".blue(), start.elapsed().as_millis());
+    println!("{} {}", "Fetched URL in:".blue(), get_elapsed_time(start));
 
     return result;
-}
+} 
