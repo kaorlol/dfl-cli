@@ -32,7 +32,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     setup_files().await?;
 
     println!("{} {}", "Fetching:".blue(), url);
-
     
     let (url, title) = fetch(&url_type, &id).await?;
     download(&url_type, &url, &title).await?;

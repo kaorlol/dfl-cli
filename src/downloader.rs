@@ -30,18 +30,8 @@ mod downloader {
     }
 
     pub mod m3u8 {
-        use std::{error::Error, fs::File, io::prelude::*, path::Path, io::BufWriter};
-        use indicatif::{ProgressBar, ProgressStyle};
         use url::Url;
-
-        fn create_progress_bar(length: u64) -> ProgressBar {
-            let pb = ProgressBar::new(length);
-            pb.set_style(ProgressStyle::default_bar()
-                .template("[{bar:40.blue}] ETA: {eta}")
-                .expect("Failed to set progress bar style")
-                .progress_chars("=> "));
-            return pb;
-        }
+        use super::*;
 
         pub async fn download(url: &str, output_file: &Path) -> Result<(), Box<dyn Error>> {
             let base_url = Url::parse(url)?;
