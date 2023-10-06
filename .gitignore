@@ -1,4 +1,5 @@
-/target
+/target/
+/target/.rustc_info.json
 /twitch
 /youtube
 /compress.bat

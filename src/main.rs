@@ -1,5 +1,3 @@
-// extern crate ytb_downloader;
-
 use std::{env, error::Error};
 use regex::Regex;
 use colored::*;
