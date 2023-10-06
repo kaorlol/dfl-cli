@@ -17,7 +17,7 @@ pub async fn setup_files() -> Result<(), Box<dyn Error>> {
 }
 
 mod downloader {
-    use std::{error::Error, fs::File, io::prelude::*, path::Path};
+    use std::{error::Error, fs::File, io::prelude::*, path::Path, io::BufWriter};
     use indicatif::{ProgressBar, ProgressStyle};
     use url::Url;
 
@@ -45,48 +45,36 @@ mod downloader {
             }
         }
 
-        let mut output_file = File::create(output_file)?;
+        let output_file = File::create(output_file)?;
         let pb = create_progress_bar(ts_files.len() as u64);
 
+        let mut output_file = BufWriter::new(output_file);
         for ts_file in ts_files {
             let ts_response = reqwest::get(ts_file).await?;
             let ts_body = ts_response.bytes().await?;
             pb.inc(1);
             output_file.write_all(&ts_body)?;
         }
-
-        // let mut tasks = Vec::new();
-        // for ts_file in ts_files {
-        //     let mut output_file = output_file.try_clone()?;
-        //     let pb = pb.clone();
-        //     tasks.push(tokio::spawn(async move {
-        //         let ts_response = reqwest::get(ts_file).await.unwrap();
-        //         let ts_body = ts_response.bytes().await.unwrap();
-        //         pb.inc(1);
-        //         output_file.write_all(&ts_body).unwrap();
-        //     }));
-        // }
-
-        // for task in tasks {
-        //     task.await?;
-        // }
+        output_file.flush()?;
 
         pb.finish_and_clear();
 
         Ok(())
     }
 
-    pub async fn download_mp4(url: &str, output_file: &Path) -> Result<(), Box<dyn Error>> {
-        let mut file = File::create(output_file)?;
+    pub async fn download(url: &str, output_file: &Path) -> Result<(), Box<dyn Error>> {
         let mut response = reqwest::get(url).await?;
 
         let length = response.content_length().unwrap_or(0);
         let pb = create_progress_bar(length);
     
+        let file = File::create(output_file)?;
+        let mut output_file = BufWriter::new(file);
         while let Some(chunk) = response.chunk().await? {
-            file.write_all(&chunk)?;
+            output_file.write_all(&chunk)?;
             pb.inc(chunk.len() as u64);
         }
+        output_file.flush()?;
     
         pb.finish_and_clear();
     
@@ -103,10 +91,10 @@ pub async fn download(type_: &str, url: &str, title: &str) -> Result<(), Box<dyn
     let start = Instant::now();
 
     match type_ {
-        "twitch-clip" => downloader::download_mp4(url, Path::new(&output)).await?,
+        "twitch-clip" => downloader::download(url, Path::new(&output)).await?,
         "twitch-video" => downloader::download_m3u8(url, Path::new(&output)).await?,
-        "youtube-video" => downloader::download_mp4(url, Path::new(&output)).await?,
-        "youtube-short" => downloader::download_mp4(url, Path::new(&output)).await?,
+        "youtube-video" => downloader::download(url, Path::new(&output)).await?,
+        "youtube-short" => downloader::download(url, Path::new(&output)).await?,
         _ => return Err("Invalid type".into())
     }
 
