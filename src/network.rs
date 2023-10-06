@@ -5,7 +5,6 @@ use invidious::*;
 use crate::elapsed::get_elapsed_time;
 
 fn get_type(url: &str) -> (bool, &str) {
-    // Regex patterns
     let regex_patterns = [
         (r"https://clips.twitch.tv/[A-Za-z0-9]+(-[A-Za-z0-9]+)*", "twitch-clip"),
         (r"https://www.twitch.tv/videos/[0-9]+", "twitch-video"),
@@ -13,7 +12,6 @@ fn get_type(url: &str) -> (bool, &str) {
         (r"https://www.youtube.com/shorts/[A-Za-z0-9_-]+", "youtube-short")
     ];
 
-    // Check if URL matches any regex patterns
     for (pattern, r#type) in regex_patterns.iter() {
         let regex = Regex::new(pattern).unwrap();
         if regex.is_match(url) {
@@ -25,13 +23,11 @@ fn get_type(url: &str) -> (bool, &str) {
 }
 
 pub async fn check_url(url: &str) -> Result<String, Box<dyn Error>> {
-    // Check if URL is valid
     let (is_valid, url_type) = get_type(url);
     if !is_valid {
         return Err("Url does not match regex pattern".into());
     }
 
-    // Return URL type
     Ok(url_type.into())
 }
 
@@ -50,16 +46,13 @@ mod twitch {
     }
 
     async fn send_gql_request(query: String) -> Result<Value, Box<dyn std::error::Error>> {
-        // Send GQL request
         let client = reqwest::Client::new();
         let response = client.post("https://gql.twitch.tv/gql").header("Client-ID", "kimne78kx3ncx6brgo4mv6wki5h1ko").body(query).send().await?;
     
-        // Check if response is successful
         if !response.status().is_success() {
             return Err("Unsuccessful response (GQL API)".into());
         }
     
-        // Parse response
         let json_response: Value = serde_json::from_str(&response.text().await?)?;
         Ok(json_response)
     }
@@ -67,7 +60,6 @@ mod twitch {
     async fn get_highest_bandwidth_url(playlist_body: &str) -> Result<String, Box<dyn std::error::Error>> {
         let re = Regex::new(r"#EXT-X-STREAM-INF:BANDWIDTH=(\d+),.*\n(.*)\n")?;
     
-        // Find highest bandwidth URL
         let mut highest_bandwidth_url = String::new();
         let mut highest_bandwidth = 0;
     
@@ -83,7 +75,6 @@ mod twitch {
     }
 
     pub async fn fetch_clip_url(id: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
-        // Fetch clip info
         let query = format!(r#"{{"operationName":"VideoAccessToken_Clip","variables":{{"slug":"{}"}},"extensions":{{"persistedQuery":{{"version":1,"sha256Hash":"36b89d2507fce29e5ca551df756d27c1cfe079e2609642b4390aa4c35796eb11"}}}}}}"#, id);
         let json_response = send_gql_request(query).await?;
         let data = &json_response["data"]["clip"];
@@ -91,7 +82,6 @@ mod twitch {
             return Err("Clip not found".into());
         }
 
-        // Fetch clip download URL
         let info_query = format!(r#"{{"query":"query{{clip(slug:\"{}\"){{title}}}}","variables":{{}}}}"#, id);
         let info_response_json = send_gql_request(info_query).await?;
         let title = remove_last_non_char(&info_response_json["data"]["clip"]["title"].to_string().replace("\"", ""));
@@ -108,25 +98,21 @@ mod twitch {
     pub async fn fetch_video_url(id: &str) -> Result<(String, String), Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
 
-        // Fetch video info
         let info_query = format!(r#"{{"query":"query{{video(id:\"{}\"){{title}}}}","variables":{{}}}}"#, id);
         let info_response = send_gql_request(info_query).await?;
         let title = remove_last_non_char(&info_response["data"]["video"]["title"].to_string().replace("\"", ""));
 
-        // Fetch video playback access token
         let token_query = format!(r#"{{"operationName":"PlaybackAccessToken_Template","query":"query PlaybackAccessToken_Template($vodID: ID!, $playerType: String!) {{  videoPlaybackAccessToken(id: $vodID, params: {{platform: \"web\", playerBackend: \"mediaplayer\", playerType: $playerType}}) @include(if: true) {{    value    signature    __typename  }}}}", "variables":{{"vodID":"{}","playerType":"embed"}}}}"#, id);
         let token_response = send_gql_request(token_query).await?;
         let token = token_response["data"]["videoPlaybackAccessToken"]["value"].as_str().unwrap_or_default();
         let signature = token_response["data"]["videoPlaybackAccessToken"]["signature"].as_str().unwrap_or_default();
 
-        // Fetch video playlist
         let playlist_url = format!("http://usher.ttvnw.net/vod/{}?nauth={}&nauthsig={}&allow_source=true&player=twitchweb", id, token, signature);
         let playlist_response = client.get(&playlist_url).send().await?;
         if !playlist_response.status().is_success() {
             return Err("Unsuccessful response (Usher API)".into());
         }
 
-        // Fetch highest bandwidth URL
         let playlist_body = playlist_response.text().await?;
         let playlist_url = get_highest_bandwidth_url(&playlist_body).await?;
 
@@ -137,8 +123,6 @@ mod twitch {
 pub async fn fetch_video_url(id: &str) -> Result<(String, String), Box<dyn Error>> {
     let client = ClientAsync::default();
     let video = client.video(&id, None).await?;
-
-    println!("{:?}", video);
     let title = video.title;
 
     let mut highest_bitrate = 0;

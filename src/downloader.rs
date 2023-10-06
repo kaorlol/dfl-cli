@@ -1,18 +1,14 @@
-// use std::{env, error::Error, fs::{File, create_dir_all}, time::Instant, process::Command, io::Write};
 use std::{env, error::Error, fs::create_dir_all, time::Instant, path::Path};
 use colored::*;
 use crate::elapsed::get_elapsed_time;
 
 const DIRECTORIES: [&str; 4] = ["twitch\\clips", "twitch\\videos", "youtube\\videos", "youtube\\shorts"];
 
-// Removes all non-alphanumeric characters from a string
 pub fn remove_not_characters(text: &str) -> String {
     return text.chars().filter(|&c| c.is_alphanumeric() || c.is_whitespace()).collect();
 }
 
-// Create required directories
 pub async fn setup_files() -> Result<(), Box<dyn Error>> {
-    // Create directories
     for directory in DIRECTORIES.iter() {
         create_dir_all(directory)?;
     }
@@ -35,25 +31,20 @@ mod downloader {
     }
 
     pub async fn download_m3u8(url: &str, output_file: &Path) -> Result<(), Box<dyn Error>> {
-        // Download the m3u8 file
         let base_url = Url::parse(url)?;
         let response = reqwest::get(base_url.join(url)?).await?;
         let body = response.text().await?;
         let mut lines = body.lines();
 
-        // Parse the m3u8 file
         let mut ts_files = Vec::new();
         while let Some(line) = lines.next() {
             if line.starts_with("#EXT-X-STREAM-INF") {
-                // Skip the next line, which contains the URL of the variant playlist
                 lines.next();
             } else if line.ends_with(".ts") {
-                // Add the ts file to the list
                 ts_files.push(base_url.join(line)?);
             }
         }
 
-        // Download and combine the ts files
         let mut output_file = File::create(output_file)?;
         let pb = create_progress_bar(ts_files.len() as u64);
 
@@ -103,7 +94,6 @@ mod downloader {
     }
 }
 
-// Downloads the type of video from the url
 pub async fn download(type_: &str, url: &str, title: &str) -> Result<(), Box<dyn Error>> {
     println!("{} {}", format!("Downloading {}:", type_).blue(), title);
 
