@@ -23,6 +23,7 @@ pub async fn setup_files() -> Result<(), Box<dyn Error>> {
 mod downloader {
     use std::{error::Error, fs::File, io::prelude::*, path::Path};
     use indicatif::{ProgressBar, ProgressStyle};
+    use url::Url;
 
     fn create_progress_bar(length: u64) -> ProgressBar {
         let pb = ProgressBar::new(length);
@@ -35,7 +36,7 @@ mod downloader {
 
     pub async fn download_m3u8(url: &str, output_file: &Path) -> Result<(), Box<dyn Error>> {
         // Download the m3u8 file
-        let base_url = url::Url::parse(url)?;
+        let base_url = Url::parse(url)?;
         let response = reqwest::get(base_url.join(url)?).await?;
         let body = response.text().await?;
         let mut lines = body.lines();
