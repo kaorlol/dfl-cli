@@ -94,10 +94,3 @@ impl Downloader {
         Ok(())
     }
 }
-
-pub async fn download(type_: &str, url: &str, title: &str) -> Result<(), Box<dyn Error>> {
-    let downloader = Downloader;
-    downloader.download(type_, url, title).await?;
-
-    Ok(())
-}
