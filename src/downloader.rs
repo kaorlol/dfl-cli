@@ -95,7 +95,6 @@ impl DownloadManager {
         let output = format!("{}\\{}s\\{}.mp4", url_type[0], url_type[1], title);
         let start = Instant::now();
 
-        // Get the appropriate downloader based on the type
         if let Some(downloader) = Self::get_downloader(type_) {
             downloader.download(url, Path::new(&output)).await?;
         } else {
