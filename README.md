@@ -15,6 +15,8 @@ Download **dfl-cli.zip** from the [latest release](https://github.com/Uvxtq/dfl-
 Twitch: Clips and VODs.\
 Youtube: Videos and shorts.
 
+**NOTE**: Downloading youtube videos and shorts is slow at the moment.
+
 ## Soon To Be Added
 
 Add a mp3 arg to the downloader to download the mp3 instead.
