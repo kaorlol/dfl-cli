@@ -8,7 +8,7 @@ mod downloader;
 
 use crate::utils::*;
 use crate::network::fetch;
-use crate::downloader::Downloader;
+use crate::downloader::DownloadManager;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -33,7 +33,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("{} {}", "Fetching:".blue(), url);
     
     let (url, title) = fetch(&url_type, &id).await?;
-    Downloader.download(&url_type, &url, &title).await?;
+    DownloadManager.download(&url_type, &url, &title).await?;
 
     Ok(())
 }

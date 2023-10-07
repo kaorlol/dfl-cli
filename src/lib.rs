@@ -4,4 +4,4 @@ pub mod downloader;
 
 pub use utils::*;
 pub use network::fetch;
-pub use downloader::Downloader;
+pub use downloader::DownloadManager;

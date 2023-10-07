@@ -180,6 +180,7 @@ dependencies = [
 name = "dfl-cli"
 version = "1.2.3"
 dependencies = [
+ "async-trait",
  "colored",
  "indicatif",
  "invidious",

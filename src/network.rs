@@ -11,11 +11,11 @@ pub struct TwitchClient;
 
 impl TwitchClient {
     pub async fn fetch(&self, id: &str, type_: &str) -> Result<(String, String), Box<dyn Error>> {
-        return match type_ {
+        match type_ {
             "twitch-video" => self.fetch_video(id).await,
             "twitch-clip" => self.fetch_clip(id).await,
             _ => Err("Invalid type".into()),
-        };
+        }
     }
 
     async fn fetch_clip(&self, id: &str) -> Result<(String, String), Box<dyn Error>> {
@@ -144,7 +144,7 @@ impl YouTubeClient {
             }
         }
 
-        return url;
+        url
     }
 }
 

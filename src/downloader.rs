@@ -1,13 +1,29 @@
-use std::{env, error::Error, time::Instant, path::Path, fs::File, io::prelude::*, io::BufWriter};
+use std::{env, error::Error, path::Path, fs::File, io::prelude::*, io::BufWriter, time::Instant};
 use colored::*;
-use crate::utils::*;
 use url::Url;
 use indicatif::ProgressBar;
+use async_trait::async_trait;
+use crate::utils::*;
+
+#[async_trait]
+pub trait Downloader {
+    async fn download(&self, url: &str, output_file: &Path) -> Result<(), Box<dyn Error>>;
+    async fn download_ts_file(&self, url: &str, output_file: &mut BufWriter<File>, pb: &mut ProgressBar) -> Result<(), Box<dyn Error>> {
+        let response = reqwest::get(url).await?;
+        let body = response.bytes().await?;
+
+        pb.inc(1);
+        output_file.write_all(&body)?;
+
+        Ok(())
+    }
+}
 
 pub struct SimpleDownloader;
 
-impl SimpleDownloader {
-    pub async fn download(&self, url: &str, output_file: &Path) -> Result<(), Box<dyn Error>> {
+#[async_trait]
+impl Downloader for SimpleDownloader {
+    async fn download(&self, url: &str, output_file: &Path) -> Result<(), Box<dyn Error>> {
         let mut response = reqwest::get(url).await?;
 
         let length = response.content_length().unwrap_or(0);
@@ -29,8 +45,9 @@ impl SimpleDownloader {
 
 pub struct M3U8Downloader;
 
-impl M3U8Downloader {
-    pub async fn download(&self, url: &str, output_file: &Path) -> Result<(), Box<dyn Error>> {
+#[async_trait]
+impl Downloader for M3U8Downloader {
+    async fn download(&self, url: &str, output_file: &Path) -> Result<(), Box<dyn Error>> {
         let base_url = Url::parse(url)?;
         let response = reqwest::get(base_url.join(url)?).await?;
         let body = response.text().await?;
@@ -48,7 +65,7 @@ impl M3U8Downloader {
         let mut pb = create_progress_bar(ts_files.len() as u64);
         let mut output_file = BufWriter::new(File::create(output_file)?);
         for ts_file in ts_files {
-            Self::download_ts_file(&ts_file.to_string(), &mut output_file, &mut pb).await?;
+            Self::download_ts_file(self, &ts_file.to_string(), &mut output_file, &mut pb).await?;
         }
         output_file.flush()?;
 
@@ -56,21 +73,20 @@ impl M3U8Downloader {
 
         Ok(())
     }
-
-    async fn download_ts_file(url: &str, output_file: &mut BufWriter<File>, pb: &mut ProgressBar) -> Result<(), Box<dyn Error>> {
-        let response = reqwest::get(url).await?;
-        let body = response.bytes().await?;
-
-        pb.inc(1);
-        output_file.write_all(&body)?;
-
-        Ok(())
-    }
 }
 
-pub struct Downloader;
+pub struct DownloadManager;
 
-impl Downloader {
+impl DownloadManager {
+    pub fn get_downloader(type_: &str) -> Option<Box<dyn Downloader>> {
+        match type_ {
+            "twitch-clip" => Some(Box::new(SimpleDownloader)),
+            "twitch-video" => Some(Box::new(M3U8Downloader)),
+            "youtube-video" | "youtube-short" => Some(Box::new(SimpleDownloader)),
+            _ => None,
+        }
+    }
+
     pub async fn download(&self, type_: &str, url: &str, title: &str) -> Result<(), Box<dyn Error>> {
         println!("{} {}", format!("Downloading {}:", type_).blue(), title);
 
@@ -79,11 +95,11 @@ impl Downloader {
         let output = format!("{}\\{}s\\{}.mp4", url_type[0], url_type[1], title);
         let start = Instant::now();
 
-        match type_ {
-            "twitch-clip" => SimpleDownloader.download(url, Path::new(&output)).await?,
-            "twitch-video" => M3U8Downloader.download(url, Path::new(&output)).await?,
-            "youtube-video" | "youtube-short" => SimpleDownloader.download(url, Path::new(&output)).await?,
-            _ => return Err("Invalid type".into())
+        // Get the appropriate downloader based on the type
+        if let Some(downloader) = Self::get_downloader(type_) {
+            downloader.download(url, Path::new(&output)).await?;
+        } else {
+            return Err("Invalid type".into());
         }
 
         println!("{} {}", format!("Downloaded {} in:", url_type[1]).blue(), get_elapsed_time(start));
