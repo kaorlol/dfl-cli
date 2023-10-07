@@ -22,7 +22,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let url_type = check_url(url).await?;
     let id = url.split('/').last().unwrap();
 
-    // Get Youtube id
     let watch_regex = Regex::new(r"watch\?v=([A-Za-z0-9_-]+)")?;
     let id = match url_type.as_str() {
         "youtube-video" => watch_regex.captures(id).unwrap()[1].to_string(),
