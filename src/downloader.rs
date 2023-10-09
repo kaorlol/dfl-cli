@@ -65,7 +65,7 @@ impl Downloader for M3U8Downloader {
         let mut pb = create_progress_bar(ts_files.len() as u64);
         let mut output_file = BufWriter::new(File::create(output_file)?);
         for ts_file in ts_files {
-            Self::download_ts_file(self, &ts_file.to_string(), &mut output_file, &mut pb).await?;
+            self.download_ts_file(&ts_file.to_string(), &mut output_file, &mut pb).await?;
         }
         output_file.flush()?;
 
