@@ -39,6 +39,7 @@ pub fn create_progress_bar(length: u64) -> ProgressBar {
 
 pub fn get_type(url: &str) -> (bool, &str) {
     let regex_patterns = [
+        (r"https://www.twitch.tv/[A-Za-z0-9]+/clip/[A-Za-z0-9]+(-[A-Za-z0-9]+)*", "twitch-clip"),
         (r"https://clips.twitch.tv/[A-Za-z0-9]+(-[A-Za-z0-9]+)*", "twitch-clip"),
         (r"https://www.twitch.tv/videos/[0-9]+", "twitch-video"),
         (r"https://www.youtube.com/watch\?v=[A-Za-z0-9_-]+", "youtube-video"),

@@ -6,9 +6,7 @@ mod utils;
 mod network;
 mod downloader;
 
-use crate::utils::*;
-use crate::network::fetch;
-use crate::downloader::DownloadManager;
+use crate::{utils::*, network::fetch, downloader::DownloadManager};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

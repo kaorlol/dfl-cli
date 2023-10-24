@@ -159,5 +159,5 @@ pub async fn fetch(type_: &str, id: &str) -> Result<(String, String), Box<dyn Er
 
     println!("{} {}", "Fetched URL in:".blue(), get_elapsed_time(start));
 
-    result
+    Ok(result?)
 }
