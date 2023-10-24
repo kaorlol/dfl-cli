@@ -16,6 +16,7 @@ pub fn get_elapsed_time(time: Instant) -> String {
 
     return formatted_elapsed;
 }
+
 pub fn remove_not_characters(text: &str) -> String {
     return text.chars().filter(|&c| c.is_alphanumeric() || c.is_whitespace()).collect();
 }
