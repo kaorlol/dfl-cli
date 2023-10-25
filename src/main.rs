@@ -1,37 +1,54 @@
-use std::{env, error::Error};
-use regex::Regex;
-use colored::*;
+mod sources;
 
-mod utils;
-mod network;
-mod downloader;
+use std::{
+    env,
+    error::Error,
+    fs::create_dir_all,
+    time::{
+        Instant,
+        Duration
+    }
+};
+use sources::Source;
 
-use crate::{utils::*, network::fetch, downloader::DownloadManager};
+const DIRECTORIES: &[&str] = &[
+    "downloads/twitch/clips", 
+    "downloads/twitch/videos", 
+    "downloads/youtube/videos", 
+    "downloads/youtube/shorts"
+];
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn setup_dir() -> Result<(), Box<dyn Error>> {
+    for directory in DIRECTORIES.iter() {
+        create_dir_all(directory)?;
+    }
+
+    Ok(())
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    setup_dir()?;
+
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        println!("Usage: {} <url>", args[0]);
+        println!( "Usage: {} <url>", args[0] );
+
         return Ok(());
     }
 
-    let url = &args[1];
-    let url_type = check_url(url).await?;
-    let id = url.split('/').last().unwrap();
+    
+    // parsing url instead of using regex to detect the 
+    let source = match Source::parse( &args[1] ) {
+        Ok(source) => source,
+        Err(e) => {
+            println!( "Failed to parse source url: {}", e );
 
-    let watch_regex = Regex::new(r"watch\?v=([A-Za-z0-9_-]+)")?;
-    let id = match url_type.as_str() {
-        "youtube-video" => watch_regex.captures(id).unwrap()[1].to_string(),
-        _ => id.to_string(),
+            return Ok(());
+        }
     };
 
-    setup_files().await?;
-
-    println!("{} {}", "Fetching:".blue(), url);
-    
-    let (url, title) = fetch(&url_type, &id).await?;
-    DownloadManager.download(&url_type, &url, &title).await?;
+    let start = Instant::now();
+    let data  = source.fetch();
 
     Ok(())
 }
