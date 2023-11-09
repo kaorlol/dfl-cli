@@ -6,7 +6,7 @@ authors = ["kaoru <@901597854274052106>"]
 description = "A CLI tool for downloading videos from youtube, and twitch."
 repository = "https://github.com/kaorlol/dfl-cli"
 license = "MIT"
-keywords = ["dfl", "download", "video", "youtube-dl", "youtube", "cli", "tool", "downloader"]
+keywords = ["dfl", "download", "video", "youtube", "twitch"]
 
 [lib]
 name = "modules"
