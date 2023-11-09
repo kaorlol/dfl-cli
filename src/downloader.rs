@@ -83,6 +83,7 @@ impl DownloadManager {
             "twitch-clip" => Some(Box::new(SimpleDownloader)),
             "twitch-video" => Some(Box::new(M3U8Downloader)),
             "youtube-video" | "youtube-short" => Some(Box::new(SimpleDownloader)),
+            "tiktok-video" => Some(Box::new(SimpleDownloader)),
             _ => None,
         }
     }

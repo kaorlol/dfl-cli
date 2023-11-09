@@ -2,6 +2,11 @@
 name = "dfl-cli"
 version = "1.2.3"
 edition = "2021"
+authors = ["kaoru <@901597854274052106>"]
+description = "A CLI tool for downloading videos from youtube, and twitch."
+repository = "https://github.com/kaorlol/dfl-cli"
+license = "MIT"
+keywords = ["dfl", "download", "video", "youtube-dl", "youtube", "cli", "tool", "downloader"]
 
 [lib]
 name = "modules"

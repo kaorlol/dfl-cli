@@ -1,4 +1,4 @@
-use std::{error::Error, time::Instant};
+use std::{error::Error, time::Instant, fs::File, io::prelude::*};
 use colored::*;
 use crate::utils::*;
 use serde_json::Value;
@@ -148,12 +148,41 @@ impl YouTubeClient {
     }
 }
 
+pub struct TikTokClient;
+
+impl TikTokClient {
+    pub async fn fetch(&self, url: &str) -> Result<(String, String), Box<dyn Error>> {
+        // Get Video Details
+        let details = reqwest::get(&format!("https://www.tiktok.com/oembed?url={}", url)).await?;
+        if !details.status().is_success() {
+            return Err("Unsuccessful response (TikTok API)".into());
+        }
+
+        let json_response: Value = serde_json::from_str(&details.text().await?)?;
+        let title = json_response["title"].to_string().replace("\"", "");
+
+        // Get Video URL
+        // scrape the main url and look for the <video> tag, then return the src attribute
+        let embedded_video = reqwest::get(url).await?;
+        if !embedded_video.status().is_success() {
+            return Err("Unsuccessful response (Tiktok may be down)".into());
+        }
+
+        let embedded_video_body = embedded_video.text().await?;
+
+        File::create("tiktok.html")?.write_all(embedded_video_body.as_bytes())?;
+        
+        Ok((String::new(), title))
+    }
+}
+
 pub async fn fetch(type_: &str, id: &str) -> Result<(String, String), Box<dyn Error>> {
     let start = Instant::now();
 
     let result = match type_ {
         "twitch-video" | "twitch-clip" => TwitchClient.fetch(id, type_).await,
         "youtube-video" | "youtube-short" => YouTubeClient.fetch(id).await,
+        "tiktok-video" => TikTokClient.fetch(id).await,
         _ => Err("Invalid type".into()),
     };
 

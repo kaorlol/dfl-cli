@@ -2,7 +2,7 @@ use std::{time::Instant, error::Error, fs::create_dir_all};
 use indicatif::{ProgressBar, ProgressStyle};
 use regex::Regex;
 
-const DIRECTORIES: [&str; 4] = ["twitch\\clips", "twitch\\videos", "youtube\\videos", "youtube\\shorts"];
+const DIRECTORIES: [&str; 5] = ["twitch\\clips", "twitch\\videos", "youtube\\videos", "youtube\\shorts", "tiktok\\videos"];
 const TIMES: [u128; 3] = [1000, 60000, 3600000];
 
 pub fn get_elapsed_time(time: Instant) -> String {
@@ -44,7 +44,8 @@ pub fn get_type(url: &str) -> (bool, &str) {
         (r"https://clips.twitch.tv/[A-Za-z0-9]+(-[A-Za-z0-9]+)*", "twitch-clip"),
         (r"https://www.twitch.tv/videos/[0-9]+", "twitch-video"),
         (r"https://www.youtube.com/watch\?v=[A-Za-z0-9_-]+", "youtube-video"),
-        (r"https://www.youtube.com/shorts/[A-Za-z0-9_-]+", "youtube-short")
+        (r"https://www.youtube.com/shorts/[A-Za-z0-9_-]+", "youtube-short"),
+        (r"https://www.tiktok.com/@[A-Za-z0-9_-]+/video/[0-9]+", "tiktok-video")
     ];
 
     for (pattern, r#type) in regex_patterns.iter() {
